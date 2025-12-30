@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dev-platform-config
+  namespace: dev-platform
+data:
+  ENVIRONMENT: "DEV"
+  APP_NAME: "Internal Developer Platform"
+  VERSION: "v1.0"
