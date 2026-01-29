@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-resource-demo
+  namespace: dev-platform
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-resource
+  template:
+    metadata:
+      labels:
+        app: nginx-resource
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "250m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 80

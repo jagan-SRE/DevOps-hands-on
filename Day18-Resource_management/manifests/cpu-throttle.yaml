@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: cpu-throttle-demo
+  namespace: dev-platform
+spec:
+  containers:
+  - name: stress-cpu
+    image: polinux/stress
+    args:
+      - "--cpu"
+      - "1"
+    resources:
+      requests:
+        cpu: "100m"
+      limits:
+        cpu: "500m"
