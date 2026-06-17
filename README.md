@@ -19,30 +19,28 @@ I focus on building and shipping systems that behave like real production platfo
 
 ## 🏗️ High-Level System Architecture
 
-The following diagram represents a simplified view of the cloud-native systems and data workflows implemented across this repository.
-
 ```mermaid
 flowchart TD
 
 User[User / Client Requests] --> API[Backend APIs / Services]
 
-API --> K8S[Kubernetes Cluster (EKS/AKS)]
-K8S --> Microservices[Microservices / Backend Services]
+API --> K8S[Kubernetes Cluster EKS AKS]
+K8S --> Microservices[Microservices Backend Services]
 
-Microservices --> DB[(Databases / Data Stores)]
-Microservices --> DataPipelines[Data Pipelines (ETL/ELT)]
+Microservices --> DB[Databases Data Stores]
+Microservices --> DataPipelines[Data Pipelines ETL ELT]
 
-DataPipelines --> Lakehouse[Databricks Delta Lake / Lakehouse Layer]
+DataPipelines --> Lakehouse[Databricks Delta Lake Lakehouse Layer]
 
-Lakehouse --> Analytics[Analytics & Reporting Layer]
+Lakehouse --> Analytics[Analytics Reporting Layer]
 
-K8S --> Observability[Monitoring & Observability]
+K8S --> Observability[Monitoring Observability Stack]
 Observability --> Prometheus[Prometheus]
 Observability --> Grafana[Grafana]
 
-CI[CI/CD Pipelines] --> K8S
-CI --> Infra[Terraform / Infrastructure as Code]
-Infra --> Cloud[AWS / Azure Cloud]
+CI[CI CD Pipelines] --> K8S
+CI --> Infra[Terraform Infrastructure as Code]
+Infra --> Cloud[AWS Azure Cloud]
 
 ---
 
