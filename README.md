@@ -41,7 +41,6 @@ Observability --> Grafana[Grafana]
 CI[CI CD Pipelines] --> K8S
 CI --> Infra[Terraform Infrastructure as Code]
 Infra --> Cloud[AWS Azure Cloud]
-
 ---
 
 ## 📦 Featured Projects
