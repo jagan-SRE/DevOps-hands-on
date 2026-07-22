@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: day45-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: day45-app
+  template:
+    metadata:
+      labels:
+        app: day45-app
+    spec:
+      containers:
+      - name: app
+        image: jagan47/devops-45day-practice:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5000

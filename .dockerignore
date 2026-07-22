@@ -1,0 +1,16 @@
+.git
+.github
+.env
+.venv
+__pycache__
+.pytest_cache
+tests
+Day*
+Dy*
+charts
+cicd
+kubernetes
+linux
+monitoring
+terraform
+README.md

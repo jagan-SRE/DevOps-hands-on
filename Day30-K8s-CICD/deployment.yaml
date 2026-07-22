@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: cicd-app
-        image: day30-cicd           # <-- use local image name
-        imagePullPolicy: IfNotPresent
+        image: jagan47/day30-cicd:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 80

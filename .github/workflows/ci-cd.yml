@@ -1,0 +1,60 @@
+name: CI/CD
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  IMAGE_REPOSITORY: ghcr.io/${{ github.repository_owner }}/devops-45day-practice
+  IMAGE_TAG: ${{ github.sha }}
+  KUBE_NAMESPACE: devops-practice
+  HAS_KUBE_CONFIG: ${{ secrets.KUBE_CONFIG != '' }}
+
+jobs:
+  test-build-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+        cache: pip
+    - name: Install test dependencies
+      run: pip install -r requirements-dev.txt
+    - name: Test application
+      run: pytest -q
+    - name: Build image
+      run: docker build -t "$IMAGE_REPOSITORY:$IMAGE_TAG" .
+    - name: Log in to GitHub Container Registry
+      if: github.event_name == 'push'
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Push image
+      if: github.event_name == 'push'
+      run: docker push "$IMAGE_REPOSITORY:$IMAGE_TAG"
+    - name: Configure kubectl
+      if: github.event_name == 'push' && env.HAS_KUBE_CONFIG == 'true'
+      env:
+        KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+      run: |
+        mkdir -p "$HOME/.kube"
+        echo "$KUBE_CONFIG" | base64 --decode > "$HOME/.kube/config"
+    - name: Deploy with Helm and verify rollout
+      if: github.event_name == 'push' && env.HAS_KUBE_CONFIG == 'true'
+      run: |
+        kubectl create namespace "$KUBE_NAMESPACE" --dry-run=client -o yaml | kubectl apply -f -
+        helm upgrade --install devops-practice charts/app \
+          --namespace "$KUBE_NAMESPACE" \
+          --set image.repository="$IMAGE_REPOSITORY" \
+          --set image.tag="$IMAGE_TAG" \
+          --set image.pullPolicy=Always
+        kubectl rollout status deployment/devops-practice \
+          --namespace "$KUBE_NAMESPACE" --timeout=180s

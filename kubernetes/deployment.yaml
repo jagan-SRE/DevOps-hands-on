@@ -1,7 +1,8 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: devops-app
+  name: devops-practice
+  namespace: devops-practice
 spec:
   replicas: 2
   selector:
@@ -14,6 +15,26 @@ spec:
     spec:
       containers:
       - name: devops-container
-        image: nginx
+        image: ghcr.io/jagan-sre/devops-45day-practice:latest
+        imagePullPolicy: Always
+        env:
+        - name: APP_VERSION
+          value: "kubernetes"
         ports:
-        - containerPort: 80
+        - name: http
+          containerPort: 5000
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: http
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: http
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 250m
+            memory: 128Mi

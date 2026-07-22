@@ -1,0 +1,15 @@
+{{- if .Values.rbac.create }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "myapp.fullname" . }}-reader
+  labels:
+    {{- include "myapp.labels" . | nindent 4 }}
+subjects:
+- kind: ServiceAccount
+  name: {{ include "myapp.serviceAccountName" . }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "myapp.fullname" . }}-reader
+{{- end }}

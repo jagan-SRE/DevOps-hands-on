@@ -34,6 +34,7 @@ pipeline {
                 sh '''
                 kubectl apply -f Day30-K8s-CICD/deployment.yaml
                 kubectl apply -f Day30-K8s-CICD/service.yaml
+                kubectl rollout status deployment/cicd-app --timeout=120s
                 '''
             }
         }
