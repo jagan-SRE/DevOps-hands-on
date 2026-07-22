@@ -1,30 +1,14 @@
-\## Day 29 – CI/CD with Docker
+# Day 29: CI/CD with Docker
 
+This exercise packages a static Nginx application, pushes a numbered image
+from Jenkins, and deploys that exact image to Kubernetes. The pipeline waits
+for `kubectl rollout status`, so an unsuccessful rollout fails the build.
 
+## Components
 
-\### What I did
+- `Dockerfile`: builds the Nginx application image.
+- `Jenkinsfile`: builds, pushes, deploys, and verifies the image.
+- `K8s/`: contains the Deployment and Service.
 
-\- Created a Dockerfile to containerize the application
-
-\- Built and tested Docker image locally
-
-\- Pushed image to DockerHub
-
-\- Deployed application to Kubernetes using Deployment and Service
-
-
-
-\### Tools Used
-
-\- Docker
-
-\- Kubernetes
-
-\- Git
-
-
-
-\## Image
-
-jagan47/day29-cicd:latest
-
+The sample registry repository is `jaganpudari/day29-cicd`. Configure a
+Jenkins username/password credential named `dockerhub` before running it.

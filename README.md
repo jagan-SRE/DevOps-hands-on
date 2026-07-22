@@ -1,114 +1,181 @@
-# Jagan Pudari — Cloud & Backend Systems Portfolio
+# DevOps Hands-On Practice
 
-## 👋 About This Repository
+This repository is a structured practice log covering Docker, Kubernetes,
+Helm, Jenkins, GitHub Actions, Prometheus, and Grafana. The exercises culminate
+in one integrated Flask metrics application at the repository root. Individual
+day folders are learning records; they are not presented as production
+systems.
 
-This repository is a collection of production-style engineering systems I’ve built to demonstrate end-to-end ownership across backend systems, cloud infrastructure, data pipelines, and Kubernetes-based platforms.
+## Integrated 45-day project
 
-I focus on building and shipping systems that behave like real production platforms, not just tutorials.
-
----
-
-## ⚙️ Core Engineering Stack
-
-**Cloud:** AWS (EKS, EC2, S3), Azure (AKS, Databricks)  
-**Backend:** Python, Java, Ruby (Rails), REST APIs  
-**Data:** SQL, ETL/ELT pipelines, Databricks, Delta Lake  
-**Infrastructure:** Kubernetes, Docker, Terraform  
-**CI/CD:** GitHub Actions, Jenkins, GitOps  
-**Observability:** Prometheus, Grafana  
-
-## 🏗️ High-Level System Architecture
+The root project implements this path:
 
 ```mermaid
-flowchart TD
+flowchart LR
+    Commit[Git commit] --> Test[Pytest]
+    Test --> Image[Docker image]
+    Image --> Registry[GHCR or Docker Hub]
+    Registry --> Helm[Helm deployment]
+    Helm --> Kubernetes[Kubernetes Deployment]
+    Kubernetes --> Verify[kubectl rollout status]
+    Kubernetes --> Metrics[Prometheus metrics]
+    Metrics --> Dashboard[Grafana dashboard]
+```
 
-User[User / Client Requests] --> API[Backend APIs / Services]
+The application provides:
 
-API --> K8S[Kubernetes Cluster EKS AKS]
-K8S --> Microservices[Microservices Backend Services]
+- `GET /` — application message and version
+- `GET /healthz` — readiness and liveness check
+- `GET /metrics` — Prometheus metrics
 
-Microservices --> DB[Databases Data Stores]
-Microservices --> DataPipelines[Data Pipelines ETL ELT]
+### Project layout
 
-DataPipelines --> Lakehouse[Databricks Delta Lake Lakehouse Layer]
+| Path | Purpose |
+| --- | --- |
+| `app/` | Flask application and pinned runtime dependencies |
+| `tests/` | Pytest health, configuration, and metrics tests |
+| `Dockerfile` | Non-root Python application image |
+| `docker-compose.yml` | Local app, Prometheus, and Grafana stack |
+| `charts/app/` | Canonical Helm Deployment, Service, probes, and RBAC |
+| `.github/workflows/ci-cd.yml` | Test, image build, GHCR push, optional Helm deploy |
+| `Jenkinsfile` | Test, Docker Hub push, Helm deploy, rollout verification |
+| `monitoring/` | Prometheus scrape and Grafana provisioning files |
+| `kubernetes/` | Plain-manifest alternative for learning and inspection |
 
-Lakehouse --> Analytics[Analytics Reporting Layer]
+## Run locally
 
-K8S --> Observability[Monitoring Observability Stack]
-Observability --> Prometheus[Prometheus]
-Observability --> Grafana[Grafana]
+Copy the environment template and change values if required:
 
-CI[CI CD Pipelines] --> K8S
-CI --> Infra[Terraform Infrastructure as Code]
-Infra --> Cloud[AWS Azure Cloud]
----
+```bash
+cp .env.example .env
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements-dev.txt
+pytest -q
+python app/app.py
+```
 
-## 📦 Featured Projects
+On Windows PowerShell, activate the environment with
+`.venv\Scripts\Activate.ps1`. Open <http://localhost:5000>,
+<http://localhost:5000/healthz>, or <http://localhost:5000/metrics>.
 
-### Cloud-Native Platform (Kubernetes + AWS + CI/CD)
+Start the complete local monitoring stack with:
 
-A production-style cloud system built using Kubernetes and AWS infrastructure.
+```bash
+docker compose up --build
+```
 
-- Kubernetes cluster deployment on AWS (EKS)
-- CI/CD pipelines for automated deployment
-- Infrastructure provisioning using Terraform
-- Monitoring using Prometheus and Grafana
-- Debugging production-style failures (CrashLoopBackOff, OOMKilled)
+- Application: <http://localhost:5000>
+- Prometheus: <http://localhost:9090>
+- Grafana: <http://localhost:3000>
 
----
+The local Grafana login is `admin` / `admin`; it is intentionally limited to
+local practice and must not be reused for an exposed environment. The
+Prometheus datasource and DevOps Practice dashboard are provisioned
+automatically.
 
-### CI/CD Pipeline System (Jenkins + Docker + EKS)
+## Deploy to Kubernetes
 
-- Jenkins-based CI/CD automation pipeline
-- Docker image build and deployment workflow
-- Kubernetes deployment on AWS EKS
-- Infrastructure as Code using Terraform
+Build and push an immutable image tag:
 
----
+```bash
+IMAGE_REPOSITORY=your-registry/devops-45day-practice
+IMAGE_TAG=$(git rev-parse --short=12 HEAD)
+docker build -t "$IMAGE_REPOSITORY:$IMAGE_TAG" .
+docker push "$IMAGE_REPOSITORY:$IMAGE_TAG"
+```
 
-### Backend API System (Rails 8)
+Deploy that exact image and verify the rollout:
 
-A REST API system simulating production backend service design.
+```bash
+kubectl create namespace devops-practice --dry-run=client -o yaml | kubectl apply -f -
+helm upgrade --install devops-practice charts/app \
+  --namespace devops-practice \
+  --set image.repository="$IMAGE_REPOSITORY" \
+  --set image.tag="$IMAGE_TAG" \
+  --set image.pullPolicy=Always
+kubectl rollout status deployment/devops-practice \
+  --namespace devops-practice --timeout=180s
+```
 
-- Transaction processing API using Rails 8
-- Structured JSON request/response handling
-- Database persistence using ActiveRecord
-- End-to-end request validation using Postman
-- Stateless API architecture design
+## Pipeline stages
 
----
+1. Checkout the commit.
+2. Install pinned application and test dependencies.
+3. Run the Pytest suite.
+4. Build a Docker image tagged with the full commit SHA.
+5. Push the immutable image to the configured registry.
+6. Upgrade the application through `charts/app`.
+7. Wait for `kubectl rollout status`; a failed rollout fails the pipeline.
 
-### Infrastructure as Code (AWS EC2)
+GitHub Actions always tests and builds. Pushes to `main` publish to GHCR. The
+deploy stages run only when a base64-encoded `KUBE_CONFIG` repository secret is
+configured. Jenkins expects a username/password credential named `dockerhub`
+and an authenticated Kubernetes context on its agent.
 
-- Provisioned AWS infrastructure using Terraform
-- EC2 setup with secure networking and IAM configuration
-- Fully reproducible cloud environment
+## Validation evidence
 
----
+The following checks were run locally on July 22, 2026 after remediation:
 
-## 🔧 Engineering Focus
+```text
+$ python -m pytest -q
+...                                                                      [100%]
+3 passed in 0.84s
 
-- Building production-ready systems (not tutorials)
-- End-to-end ownership (design → deploy → monitor)
-- Cloud-native architecture and automation
-- Backend + data pipeline engineering
-- Reliability and observability-first design
+$ helm lint charts/app
+1 chart(s) linted, 0 chart(s) failed
+```
 
----
+Docker Desktop was installed but its Linux engine was initially unavailable,
+then started successfully. The image built and the complete Compose stack was
+checked live:
 
-## 📊 What This Demonstrates
+```text
+application health: ok
+application version: local-compose
+metrics contains app_requests_total: true
+Prometheus target health: up
+Grafana database: ok (12.1.0)
+provisioned dashboard: DevOps Practice Application
+```
 
-- Backend system design
-- Distributed systems thinking
-- Cloud infrastructure engineering
-- Data pipeline development
-- CI/CD and automation workflows
-- Production debugging and reliability engineering
+The configured Kubernetes endpoint was no longer reachable. Therefore, this
+remediation does not claim a successful live registry push or cluster rollout.
+The CI/CD definitions include those steps and fail loudly on rollout errors,
+but their first authenticated live run remains required evidence.
 
----
+## Exercise log and recovery notes
 
-## 📌 Contact
+The day folders retain focused Docker, Kubernetes, Linux, Bash, Jenkins, and
+Helm exercises. During remediation, seven accidental gitlinks were replaced
+with normal tracked paths. Day 6 was recovered from its matching public
+repository. The original contents for Days 9–10, 15, 27, 28, and 35 and the
+old `terraform` path were unavailable; those folders contain recovery notices
+rather than invented replacements.
 
-GitHub: github.com/jagan-SRE  
-LinkedIn: linkedin.com/in/jaganpudari  
-Location: St. Louis, MO  
+Day 31 remains documentation for a manually created AWS EC2/VPC exercise. It
+does not contain Terraform, an Application Load Balancer, Auto Scaling, or
+Route 53 automation and is not claimed as an automated high-availability
+infrastructure project.
+
+## Current scope
+
+Working code in this repository demonstrates Python/Flask, Docker,
+Kubernetes manifests, Helm, Jenkins, GitHub Actions, Prometheus, and Grafana.
+It does not demonstrate EKS provisioning, Terraform infrastructure, GitOps,
+Rails, Databricks, or AI/RAG troubleshooting. Those technologies are
+deliberately excluded from the project claims until corresponding working
+implementations exist.
+
+## What I built
+
+I integrated the strongest practice exercises into one testable Flask
+application. I containerized it, exposed health and Prometheus endpoints,
+made Helm the canonical Kubernetes deployment path, added namespace-scoped
+RBAC, and connected both GitHub Actions and Jenkins to immutable image tags
+and rollout verification. I also provisioned a local Prometheus/Grafana stack
+for inspecting application availability and request rate.
+
+## License
+
+Released under the [MIT License](LICENSE).
