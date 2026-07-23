@@ -1,0 +1,14 @@
+#!/bin/bash
+set -euo pipefail
+
+dnf update -y
+dnf install -y docker
+systemctl enable --now docker
+
+docker pull "${container_image}"
+docker run --detach \
+  --name devops-practice \
+  --restart unless-stopped \
+  --publish 5000:5000 \
+  --env APP_VERSION=aws-asg \
+  "${container_image}"

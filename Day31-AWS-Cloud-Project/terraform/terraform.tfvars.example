@@ -1,0 +1,20 @@
+aws_region    = "us-east-1"
+project_name  = "devops-practice"
+vpc_cidr      = "10.42.0.0/16"
+instance_type = "t3.micro"
+
+min_size         = 2
+desired_capacity = 2
+max_size         = 4
+
+container_image = "ghcr.io/jagan-sre/devops-45day-practice:4fcf41ab30bea44cfc4d645759ffe5f6816291e5"
+
+# Enable only after replacing the example value with a domain you control.
+enable_route53 = false
+domain_name    = "portfolio.example.com"
+
+tags = {
+  Project     = "devops-45day-practice"
+  ManagedBy   = "Terraform"
+  Environment = "portfolio-validation"
+}

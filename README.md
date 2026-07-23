@@ -153,19 +153,20 @@ repository. The original contents for Days 9–10, 15, 27, 28, and 35 and the
 old `terraform` path were unavailable; those folders contain recovery notices
 rather than invented replacements.
 
-Day 31 remains documentation for a manually created AWS EC2/VPC exercise. It
-does not contain Terraform, an Application Load Balancer, Auto Scaling, or
-Route 53 automation and is not claimed as an automated high-availability
-infrastructure project.
+Day 31 now contains modular Terraform for a two-AZ VPC, public/private
+subnets, per-AZ NAT gateways, scoped security groups, an ALB, an Auto Scaling
+Group, and optional Route 53. It completed a real apply, ALB health check, ASG
+replacement test, and destroy cycle. Route 53 was plan-validated but not
+applied because no owned domain was available.
 
 ## Current scope
 
 Working code in this repository demonstrates Python/Flask, Docker,
-Kubernetes manifests, Helm, Jenkins, GitHub Actions, Prometheus, and Grafana.
-It does not demonstrate EKS provisioning, Terraform infrastructure, GitOps,
-Rails, Databricks, or AI/RAG troubleshooting. Those technologies are
-deliberately excluded from the project claims until corresponding working
-implementations exist.
+Kubernetes manifests, Helm, Jenkins, GitHub Actions, Prometheus, Grafana,
+Terraform, and AWS VPC/EC2/ALB/Auto Scaling infrastructure. It does not
+demonstrate EKS provisioning, GitOps, Rails, Databricks, or AI/RAG
+troubleshooting. Those technologies are deliberately excluded from the
+project claims until corresponding working implementations exist.
 
 ## What I built
 

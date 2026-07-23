@@ -1,0 +1,47 @@
+Terraform validation evidence (sanitized)
+Run date: 2026-07-22/23 UTC
+Region: us-east-1
+Terraform: 1.14.5
+AWS provider: 6.56.0
+
+terraform fmt -check -recursive
+  Exit code: 0
+
+terraform validate
+  Success! The configuration is valid.
+
+terraform plan (enable_route53=false)
+  Amazon Linux AMI data source resolved successfully.
+  Plan: 28 to add, 0 to change, 0 to destroy.
+  Planned components:
+    - 1 VPC and internet gateway
+    - 2 public and 2 private subnets across us-east-1a/us-east-1b
+    - 2 NAT gateways with per-AZ private route tables
+    - 2 security groups; application ingress references only the ALB SG
+    - 1 launch template and Auto Scaling Group (desired capacity 2)
+    - 1 target-tracking scaling policy
+    - 1 ALB, target group, and HTTP listener
+
+terraform plan -var enable_route53=true \
+  -var domain_name=portfolio.example.com
+  module.route53.aws_route53_zone.this[0] will be created
+  module.route53.aws_route53_record.app[0] will be created
+  Plan: 30 to add, 0 to change, 0 to destroy.
+
+Live apply evidence (Route 53 disabled; no owned domain available)
+  ALB /healthz response: {"status":"ok"}
+  ASG desired capacity: 2
+  Final target state: 2 healthy across two availability zones
+  Recovery observed: ASG replaced one failed initial target
+
+terraform destroy
+  Completed after live checks.
+
+Post-destroy verification
+  terraform plan -destroy: No changes. No objects need to be destroyed.
+  Matching ASGs: []
+  Matching ALBs: []
+  Available/pending tagged NAT gateways: []
+
+Resource IDs in the README are historical validation evidence and no longer
+identify running resources.

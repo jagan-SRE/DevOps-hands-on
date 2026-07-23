@@ -2,6 +2,8 @@
 terraform.tfstate
 terraform.tfstate.backup
 *.tfvars
+tfplan
+*.tfplan
 *.secret.yaml
 .DS_Store
 Thumbs.db
