@@ -159,6 +159,13 @@ Group, and optional Route 53. It completed a real apply, ALB health check, ASG
 replacement test, and destroy cycle. Route 53 was plan-validated but not
 applied because no owned domain was available.
 
+## Related project
+
+[cloud-monitoring-ai-ops](https://github.com/jagan-SRE/cloud-monitoring-ai-ops)
+extends the monitoring work as a separate, focused project. It queries
+Prometheus health, detects log anomalies, retrieves operational runbooks from
+Chroma, and prepares grounded OpenAI-assisted triage responses.
+
 ## Current scope
 
 Working code in this repository demonstrates Python/Flask, Docker,
